@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+    <Folder Include="Utilities\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SWE.Http" Version="1.0.3" />
+    <PackageReference Include="SWE.Polly" Version="1.0.1" />
+  </ItemGroup>
+
+</Project>

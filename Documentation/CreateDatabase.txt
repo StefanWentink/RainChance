@@ -1,0 +1,5 @@
+Package manager console =>
+
+Default project: RainChance.DAL
+
+update-database -context RainChanceContext -startupproject RainChance
