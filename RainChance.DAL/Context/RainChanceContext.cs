@@ -49,8 +49,8 @@
             }
         }
 
-        public DbSet<DayPrediction> DayPrediction { get; set; }
+        public virtual DbSet<DayPrediction> DayPrediction { get; set; }
 
-        public DbSet<HourPrediction> HourPrediction { get; set; }
+        public virtual DbSet<HourPrediction> HourPrediction { get; set; }
     }
 }

@@ -1,12 +1,17 @@
 ﻿namespace RainChance.DL.Models
 {
-    using SWE.Model.Interfaces;
+    using RainChance.DL.Interfaces;
     using System;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
-    public abstract class Prediction : IKey
+    public abstract class Prediction : IPrediction
     {
+        protected Prediction()
+        {
+            Id = Guid.NewGuid();
+        }
+
         [Key]
         [Required]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]

@@ -1,0 +1,6 @@
+/****** Script for SelectTopNRows command from SSMS  ******/
+SELECT Count(*) FROM [RainChance].[dbo].[DayPrediction]
+SELECT Count(*) FROM [RainChance].[dbo].[HourPrediction]
+
+
+SELECT * FROM [RainChance].[dbo].[HourPrediction] order by [Time]

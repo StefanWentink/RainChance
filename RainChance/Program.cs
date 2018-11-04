@@ -8,6 +8,7 @@
     using RainChance.DAL.Context;
     using RainChance.DAL.Extensions;
     using RainChance.DAL.Models;
+    using RainChance.DAL.Repositories;
     using RainChance.DarkSky.Models;
     using RainChance.Extensions;
     using RainChance.Factories;
@@ -58,47 +59,80 @@
         {
             var apiKey = Configuration.GetValue<string>("DarkSky:ApiKey");
             var cancellationToken = new CancellationToken();
-            var context = new RainChanceContext();
 
-            //var intervalEnd = DateTimeOffset.Now.AddDays(-1).SetToStartOfDay();
-            var intervalEnd = DateTimeOffset.Now.AddDays(-2).SetToStartOfDay();
-            var referenceDate = intervalEnd.AddYears(-value);
-            var repository = ServiceProvider.GetRequiredService<IRepository<ResponsePrediction>>();
+            var intervalEnd = DateTimeOffset.Now.AddDays(-1).SetToStartOfDay();
+            var referenceDate = intervalEnd;
 
-            while (referenceDate <= intervalEnd)
+            using (var rainChanceContext = new RainChanceContext())
+            using (var dayPredictionRepository = new DayPredictionRepository(rainChanceContext))
+            using (var hourPredictionRepository = new HourPredictionRepository(rainChanceContext))
             {
-                var darkSkyParams = new DarkSkyParams(
-                    apiKey,
-                    Coordinates.Latitude,
-                    Coordinates.Longitude,
-                    referenceDate);
+                var repository = ServiceProvider.GetRequiredService<IRepository<ResponsePrediction>>();
 
-                var darkSkyResults = await repository.ReadAsync(cancellationToken, null, darkSkyParams.FormatUri())
-                    .ConfigureAwait(false);
-
-                var darkSkyResult = darkSkyResults.SingleOrDefault();
-
-                Logger.LogDebug(darkSkyResult.ToString());
-
-                foreach (var daily in darkSkyResult.Daily.Daily)
+                switch (value)
                 {
-                    var day = new DayPredictionBuilder(daily).SetOffsetHours(darkSkyResult.Offset).Build();
-                    await context.AddAsync(day, cancellationToken).ConfigureAwait(false);
+                    case 1:
+                        referenceDate = (await dayPredictionRepository.GetNewestAsync()
+                            .ConfigureAwait(false))
+                            ?.Time.AddDays(1) ?? referenceDate;
 
-                    foreach (var hourly in darkSkyResult.Hourly.Hourly)
-                    {
-                        var hour = new HourPredictionBuilder(hourly).SetOffsetHours(darkSkyResult.Offset).Build();
-                        hour.DayPredictionId = day.Id;
+                        if (referenceDate > intervalEnd)
+                        {
+                            Logger.LogInformation($"We are already up to date till {intervalEnd.Date}.");
+                        }
 
-                        await context.AddAsync(hour, cancellationToken)
-                            .ConfigureAwait(false);
-                    }
+                        break;
 
-                    await context.SaveChangesAsync(cancellationToken)
-                        .ConfigureAwait(false);
+                    case 2:
+
+                        intervalEnd = (await dayPredictionRepository.GetOldestAsync()
+                         .ConfigureAwait(false))
+                         ?.Time.AddDays(-1) ?? intervalEnd;
+
+                        referenceDate = intervalEnd.AddYears(-1).AddDays(1);
+
+                        break;
                 }
 
-                referenceDate = referenceDate.AddDays(1).SetToStartOfDay();
+                Logger.LogInformation($"Loading from {referenceDate.Date} to {intervalEnd}.");
+
+                while (referenceDate <= intervalEnd)
+                {
+                    var darkSkyParams = new DarkSkyParams(
+                        apiKey,
+                        Coordinates.Latitude,
+                        Coordinates.Longitude,
+                        referenceDate);
+
+                    var darkSkyResults = await repository.ReadAsync(cancellationToken, null, darkSkyParams.FormatUri())
+                        .ConfigureAwait(false);
+
+                    var darkSkyResult = darkSkyResults.SingleOrDefault();
+
+                    Logger.LogDebug(darkSkyResult.ToString());
+
+                    foreach (var daily in darkSkyResult.Daily.Daily)
+                    {
+                        var day = new DayPredictionBuilder(daily).SetOffsetHours(darkSkyResult.Offset).Build();
+                        await dayPredictionRepository.AddAsync(day, cancellationToken).ConfigureAwait(false);
+
+                        foreach (var hourly in darkSkyResult.Hourly.Hourly)
+                        {
+                            var hour = new HourPredictionBuilder(hourly).SetOffsetHours(darkSkyResult.Offset).Build();
+                            hour.DayPredictionId = day.Id;
+
+                            await hourPredictionRepository.AddAsync(hour, cancellationToken)
+                                .ConfigureAwait(false);
+                        }
+
+                        var saveResult = await rainChanceContext.SaveChangesAsync(cancellationToken)
+                            .ConfigureAwait(false);
+
+                        Logger.LogInformation($"Processed {referenceDate.Date} : {saveResult}.");
+                    }
+
+                    referenceDate = referenceDate.AddDays(1).SetToStartOfDay();
+                }
             }
         }
 
@@ -107,8 +141,8 @@
             Logger.LogInformation(string.Empty);
             Logger.LogInformation("Choose one of the following options.");
             Logger.LogInformation("0. Read yesterday.");
-            Logger.LogInformation("1. Last years.");
-            Logger.LogInformation("2. Last 2 years.");
+            Logger.LogInformation("1. New entries untill yesterday.");
+            Logger.LogInformation("2. Load year since oldest entry.");
             Logger.LogInformation("9. Exit program.");
             Logger.LogInformation(string.Empty);
 

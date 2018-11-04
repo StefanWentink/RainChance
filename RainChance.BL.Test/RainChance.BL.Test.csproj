@@ -23,18 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Extensions\**" />
-    <Compile Remove="Interfaces\**" />
-    <Compile Remove="Utilities\**" />
-    <EmbeddedResource Remove="Extensions\**" />
-    <EmbeddedResource Remove="Interfaces\**" />
-    <EmbeddedResource Remove="Utilities\**" />
-    <None Remove="Extensions\**" />
-    <None Remove="Interfaces\**" />
-    <None Remove="Utilities\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.4.2" />
     <PackageReference Include="Moq" Version="4.10.0" />
     <PackageReference Include="Microsoft.CodeCoverage" Version="15.9.0" />
@@ -48,6 +36,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RainChance.DAL\RainChance.DAL.csproj" />
+    <ProjectReference Include="..\RainChance.BL\RainChance.BL.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Factories\" />
+    <Folder Include="Extensions\" />
+    <Folder Include="Builders\" />
   </ItemGroup>
 </Project>
