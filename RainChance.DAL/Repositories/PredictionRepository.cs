@@ -6,7 +6,9 @@
     using RainChance.DL.Interfaces;
     using SWE.EntityFramework.Extensions;
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -27,6 +29,19 @@
             return await Context.Set<T>()
                 .SingleOrDefaultAsyncSafe(PredictionQueryUtilities.IdExpression<T, Guid>(key))
                 .ConfigureAwait(false);
+        }
+
+        public async Task<List<T>> GetAllAsync(
+            CancellationToken cancellationToken = default)
+        {
+            return await Context.Set<T>().ToListAsyncSafe(cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task<List<T>> GetAllByExpressionAsync(
+            Expression<Func<T, bool>> expression,
+            CancellationToken cancellationToken = default)
+        {
+            return await Context.Set<T>().Where(expression).ToListAsyncSafe(cancellationToken).ConfigureAwait(false);
         }
 
         public async Task AddAsync(T entity, CancellationToken cancellationToken)

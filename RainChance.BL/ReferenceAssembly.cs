@@ -2,6 +2,6 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly: InternalsVisibleTo(assemblyName: "RainChance.DAL.Test")]
-[assembly: InternalsVisibleTo(assemblyName: "RainChance.DAL.Integration")]
+[assembly: InternalsVisibleTo(assemblyName: "RainChance.BL.Test")]
+[assembly: InternalsVisibleTo(assemblyName: "RainChance.BL.Integration")]
 [assembly: ComVisible(false)]

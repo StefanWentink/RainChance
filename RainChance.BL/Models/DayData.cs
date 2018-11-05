@@ -1,28 +1,27 @@
-﻿namespace RainChance.DL.Models
+﻿using RainChance.BL.Interfaces;
+
+namespace RainChance.DL.Models
 {
-    using System;
-    using System.Collections.Generic;
-
-    public class DayData
+    public class DayData : IValueSelector
     {
-        public double PrecipIntensity { get; set; }
+        public float PrecipIntensity { get; set; }
 
-        public double PrecipProbability { get; set; }
+        public float PrecipProbability { get; set; }
 
-        public double PrecipIntensityMax { get; set; }
+        public float PrecipIntensityMax { get; set; }
 
-        public double Humidity { get; set; }
+        public float Humidity { get; set; }
 
-        public double Pressure { get; set; }
+        public float Pressure { get; set; }
 
-        public double WindSpeed { get; set; }
+        public float WindSpeed { get; set; }
 
-        public int WindBearing { get; set; }
+        public float WindBearing { get; set; }
 
-        public double CloudCover { get; set; }
+        public float CloudCover { get; set; }
 
-        public double TemperatureHigh { get; set; }
+        public float TemperatureHigh { get; set; }
 
-        public double TemperatureLow { get; set; }
+        public float TemperatureLow { get; set; }
     }
 }

@@ -41,7 +41,6 @@
 
   <ItemGroup>
     <Folder Include="Factories\" />
-    <Folder Include="Extensions\" />
     <Folder Include="Builders\" />
   </ItemGroup>
 </Project>
